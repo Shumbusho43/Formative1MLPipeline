@@ -1,155 +1,272 @@
 # Beijing Air Quality — Time-Series ML Pipeline
 
-Group formative: time-series preprocessing, SQL + MongoDB databases, a CRUD/time-series API, and a forecasting script, built on the [Beijing Multi-Site Air Quality dataset](https://www.kaggle.com/datasets/sid321axn/beijing-multisite-airquality-data-set) (12 stations, hourly, 2013-03-01 → 2017-02-28, 420,768 rows).
+A group formative project using the Beijing Multi-Site Air Quality dataset to demonstrate time-series preprocessing, exploratory data analysis (EDA), machine learning, relational and non-relational databases, CRUD APIs, and next-hour PM2.5 prediction.
+
+The dataset contains hourly air-quality measurements from 12 monitoring stations between March 1, 2013, and February 28, 2017, with 420,768 records.
 
 ## Live API
 
-The API is deployed on Render:
-
 - **Base URL:** https://formative1mlpipeline.onrender.com
-- **Interactive docs (Swagger):** https://formative1mlpipeline.onrender.com/docs
+- **Interactive API documentation:** https://formative1mlpipeline.onrender.com/docs
 
-It is backed by hosted databases: Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`), both loaded with the full dataset.
+The deployed API uses hosted Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`).
 
-> **Note: Render free tier sleeps.** The service spins down after ~15 minutes without traffic. The first request after that can take **up to a minute** while it wakes up; later requests are fast. If a request times out, wait a moment and retry, or open the docs link once to wake it before a demo. Scripts calling the API should use a generous timeout (e.g. `timeout=90`).
+**Render free-tier note:** The service may sleep after a period without traffic. The first request can take up to a minute to respond. If a request times out, retry it or open the API documentation first.
 
-| Task | Owner | Location |
-|------|-------|----------|
-| 1. Preprocessing, EDA, model | Kyla (Member 1) | `notebooks/` *(to add)* |
-| 2. MySQL + MongoDB design | Nicole (Member 2) | `notebooks/`, `database/schema_mysql.sql` |
-| 3. CRUD + time-series API | David (Member 3) | `api/`, `database/load_data.py`, `tests/` |
-| 4. Prediction script | Musiime (Member 4) | *(to add)* |
+## Project responsibilities
+
+| Task | Member | Responsibility | Main location |
+|---|---|---|---|
+| 1 | Kyla | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/` |
+| 2 | Nicole | MySQL and MongoDB database design | `database/schema_mysql.sql`, database documentation |
+| 3 | David | CRUD and time-series API | `api/`, `database/load_data.py`, `tests/` |
+| 4 | Musiime | Prediction script and model integration | `prediction/predict.py`, `models/best_rf.joblib` |
 
 ## Project structure
 
-```
-api/
-  main.py                 FastAPI app (mounts /sql and /mongo routers)
-  config.py               settings from environment / .env
-  schemas.py              shared request/response models
-  sql_db.py               SQLAlchemy models for the Task 2 MySQL schema
-  mongo_db.py             MongoDB collection access + flat <-> nested mapping
-  routers/sql_readings.py
-  routers/mongo_readings.py
-database/
-  schema_mysql.sql        Task 2 DDL (stations, readings, pollutant_reference)
-  load_data.py            loads the 12 CSVs into MySQL and MongoDB
-tests/test_api.py         endpoint tests for both backends (SQLite in-memory + mongomock)
+```text
+Formative1MLPipeline/
+├── api/
+│   ├── main.py
+│   ├── config.py
+│   ├── schemas.py
+│   ├── sql_db.py
+│   ├── mongo_db.py
+│   └── routers/
+│       ├── sql_readings.py
+│       └── mongo_readings.py
+├── database/
+│   ├── schema_mysql.sql
+│   └── load_data.py
+├── notebooks/
+│   └── Beijing_Air_Quality_Task1.ipynb
+├── prediction/
+│   └── predict.py
+├── models/
+│   └── best_rf.joblib
+├── tests/
+│   ├── test_api.py
+│   └── test_prediction.py
+├── requirements.txt
+├── README.md
+└── .env.example
 ```
 
-## Setup
+## 1. Setup
+
+### Prerequisites
+
+- Python version compatible with `requirements.txt`
+- Access to a configured MySQL database
+- Access to a configured MongoDB database
+- Dataset files for local data loading, if required
+
+### Install dependencies
+
+On Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+On Linux or macOS:
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env          # then set your MySQL user/password
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-1. Download the Kaggle archive and unzip the 12 CSVs into `data/raw/`.
-2. Create the MySQL database: `mysql -u <user> -p < database/schema_mysql.sql`
-3. Make sure MongoDB is running on `localhost:27017`.
-4. Load the data into both databases (≈30 s):
+Configure database environment variables using `.env.example` as a reference. Keep credentials and connection strings in `.env`, and never commit secrets to Git.
+
+### Dataset and database setup
+
+1. Download the [Beijing Multi-Site Air Quality dataset from Kaggle](https://www.kaggle.com/datasets/sid321axn/beijing-multisite-airquality-data-set).
+2. Extract the station CSV files into `data/raw/` if using the local data loader.
+3. Configure the SQL and MongoDB connection settings.
+4. Apply the MySQL schema and load the data using the instructions supported by the current loader.
+
+Check the loader's actual options before using it:
 
 ```bash
-python -m database.load_data --data-dir data/raw
+python -m database.load_data --help
 ```
 
-Options: `--target sql|mongo`, `--stations Dongsi Tiantan`, `--reset` (wipe and reload).
+The deployed API uses hosted databases. Local setup may require separate database configuration and data loading.
 
-> **Hosted databases:** our shared instances are Aiven MySQL (set `SQL_SSL=true`) and MongoDB Atlas (`mongodb+srv://…`). Both are already loaded, so teammates only need the connection strings in their own `.env` (ask the team, never commit them). For Atlas, your IP must also be allowed under Network Access.
->
-> No MySQL server? Set `SQL_DATABASE_URL=sqlite:///./beijing_air_quality.db`. The SQLAlchemy code is the same for both.
+## 2. Task 1 — Time-series analysis and machine learning
 
-## Running the API
+The Task 1 notebook is `notebooks/Beijing_Air_Quality_Task1.ipynb`.
 
-```bash
-uvicorn api.main:app --reload
-```
+The model predicts **next-hour PM2.5 concentration for the Dongsi station**. The target is formed by shifting the PM2.5 series by one hour, while the input features represent the current observation and time.
 
-Interactive docs (try every endpoint in the browser): http://127.0.0.1:8000/docs
+The 13 model features are:
 
-### Deploying to Render
-
-The live instance uses these settings (Render → New → Web Service):
-
-| Setting | Value |
+| Feature group | Features |
 |---|---|
-| Build command | `pip install -r requirements.txt` |
-| Start command | `uvicorn api.main:app --host 0.0.0.0 --port $PORT` |
-| Environment | `SQL_DATABASE_URL`, `SQL_SSL=true`, `MONGO_URI`, `MONGO_DB_NAME`, `MONGO_COLLECTION`, `PYTHON_VERSION` |
+| Pollutants | `PM2.5`, `PM10`, `SO2`, `NO2`, `CO`, `O3` |
+| Weather | `TEMP`, `PRES`, `DEWP`, `RAIN`, `WSPM` |
+| Time | `hour`, `month` |
 
-Atlas must allow connections from `0.0.0.0/0` (Network Access), because Render's free tier has no fixed outbound IP.
+Reported model results:
 
-## Endpoints
+| Model | MAE | RMSE | R² |
+|---|---:|---:|---:|
+| Baseline Random Forest | 11.558 | 22.164 | 0.942 |
+| Tuned Random Forest | 11.146 | 21.615 | 0.945 |
 
-Both backends expose the same routes under `/sql` and `/mongo`, and accept/return the same flat JSON shape:
+The tuned model used randomized hyperparameter search with time-series cross-validation. The saved pipeline is `models/best_rf.joblib`.
+
+Ensure the notebook includes the assignment's required analytical questions, visualizations, interpretations, lagged features, moving averages, and experiment comparisons.
+
+## 3. Task 2 — Relational and non-relational databases
+
+### MySQL
+
+The MySQL schema is in `database/schema_mysql.sql`. The documented tables include:
+
+- `stations`
+- `readings`
+- `pollutant_reference`
+
+### MongoDB
+
+MongoDB reading documents use nested pollutant and weather information. The API maps records into a common response structure.
+
+The assignment evidence should include the ERD, SQL schema, MongoDB collection design and sample documents, and at least three queries for each database with their results.
+
+## 4. Task 3 — CRUD and time-series API
+
+The API uses FastAPI and exposes endpoints for SQL and MongoDB.
+
+Start the API locally from the project root:
+
+```bash
+python -m uvicorn api.main:app --reload
+```
+
+Open the interactive documentation at:
+
+http://127.0.0.1:8000/docs
+
+### Endpoint summary
+
+Both database backends use the `/sql` and `/mongo` prefixes.
 
 | Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/{db}/readings` | Create a reading (409 if that station-hour already exists) |
-| `GET` | `/{db}/readings?station=&limit=&offset=` | List readings, newest first |
-| `GET` | `/{db}/readings/{id}` | Get one reading |
-| `PUT` | `/{db}/readings/{id}` | Partial update: only the fields you send change |
+|---|---|---|
+| `POST` | `/{db}/readings` | Create a reading |
+| `GET` | `/{db}/readings` | List readings, with optional filtering and pagination |
+| `GET` | `/{db}/readings/{id}` | Retrieve a reading by ID |
+| `PUT` | `/{db}/readings/{id}` | Update a reading |
 | `DELETE` | `/{db}/readings/{id}` | Delete a reading |
-| `GET` | `/{db}/readings/latest?station=` | **Latest record**, overall or for one station |
-| `GET` | `/{db}/readings/range?start=&end=&station=&limit=` | **Records by date range** (inclusive, oldest first) |
+| `GET` | `/{db}/readings/latest?station=Dongsi` | Retrieve the latest reading |
+| `GET` | `/{db}/readings/range?start=...&end=...` | Retrieve readings in a date range |
 | `GET` | `/{db}/stations` | List stations |
 
-`{db}` is `sql` or `mongo`. Timestamps are ISO-8601 (`2016-01-01T00:00:00`). `id` is the `reading_id` for SQL and the `ObjectId` string for MongoDB. `limit` is capped at 5000.
+Here, `{db}` is either `sql` or `mongo`.
 
-Reading shape:
+The API supports reading creation, retrieval, updates, deletion, latest-record retrieval, and date-range queries. Consult the live Swagger documentation for the exact request schemas and available parameters.
 
-```json
-{
-  "id": "140256", "station": "Dongsi", "timestamp": "2017-02-28T23:00:00",
-  "pm25": 30.0, "pm10": 71.0, "so2": 11.0, "no2": 87.0, "co": 1200.0, "o3": 4.0,
-  "temp": 8.6, "pres": 1014.1, "dewp": -15.9, "rain": 0.0,
-  "wind_direction": "NNE", "wind_speed": 1.3
-}
-```
-
-In MongoDB, readings are stored with the nested `pollutants` / `weather` structure designed in Task 2. The API converts them to the flat shape so clients can treat both backends the same way.
-
-### Examples
-
-Against the live deployment (swap in `http://127.0.0.1:8000` when running locally):
+### Example requests
 
 ```bash
-API=https://formative1mlpipeline.onrender.com
+API="https://formative1mlpipeline.onrender.com"
 
 curl "$API/sql/readings/latest?station=Dongsi"
-curl "$API/mongo/readings/range?start=2016-01-01T00:00:00&end=2016-01-07T23:00:00&station=Dongsi"
-curl -X POST "$API/mongo/readings" -H "Content-Type: application/json" \
-     -d '{"station":"Dongsi","timestamp":"2017-03-01T00:00:00","pm25":28,"temp":7.9}'
-curl -X PUT "$API/sql/readings/<id>" -H "Content-Type: application/json" -d '{"pm25":35}'
-curl -X DELETE "$API/sql/readings/<id>"
+curl "$API/mongo/readings/latest?station=Dongsi"
 ```
 
-### For Task 4 (prediction script)
+For local testing, replace the base URL with `http://127.0.0.1:8000`.
 
-Fetch data from the live API, allowing for the free-tier wake-up delay:
+Use suitable test records when demonstrating create, update, and delete operations. Do not assume example IDs exist in the database.
 
-```python
-import requests
+## 5. Task 4 — Prediction script and model integration
 
-API = "https://formative1mlpipeline.onrender.com"
-resp = requests.get(f"{API}/sql/readings/latest", params={"station": "Dongsi"}, timeout=90)
-resp.raise_for_status()
-reading = resp.json()
+The script `prediction/predict.py` connects the API to the saved model.
+
+It:
+
+1. Loads `models/best_rf.joblib`.
+2. Fetches the latest available reading for the selected station from the API.
+3. Maps API field names to the model's training feature names.
+4. Derives `hour` and `month` from the timestamp.
+5. Predicts next-hour PM2.5 concentration.
+
+Run the script from the project root:
+
+```powershell
+python prediction/predict.py
 ```
 
-The model from Task 1 uses the raw CSV column names. Map the API fields back before predicting:
+The script expects the API to be available at the URL configured in the script. For local testing, the API should be running in another terminal. The deployed API may require a longer HTTP timeout because the free service can sleep.
+
+### Feature mapping
 
 | API field | Model feature |
-|-----------|---------------|
-| `pm25`, `pm10`, `so2`, `no2`, `co`, `o3` | `PM2.5`, `PM10`, `SO2`, `NO2`, `CO`, `O3` |
-| `temp`, `pres`, `dewp`, `rain`, `wind_speed` | `TEMP`, `PRES`, `DEWP`, `RAIN`, `WSPM` |
-| `timestamp` | derive `hour`, `month` |
+|---|---|
+| `pm25` | `PM2.5` |
+| `pm10` | `PM10` |
+| `so2` | `SO2` |
+| `no2` | `NO2` |
+| `co` | `CO` |
+| `o3` | `O3` |
+| `temp` | `TEMP` |
+| `pres` | `PRES` |
+| `dewp` | `DEWP` |
+| `rain` | `RAIN` |
+| `wind_speed` | `WSPM` |
+| `timestamp` | Derive `hour` and `month` |
 
-## Tests
+The feature names and order must match those used during training. The script should load the complete saved pipeline, including its preprocessing steps.
 
-```bash
-pytest -v
+### Example output
+
+A previous successful run produced:
+
+```text
+Station: Dongsi
+Latest recorded timestamp: 2017-02-28T23:00:00
+Latest recorded PM2.5: 30.0
+Predicted next-hour PM2.5: 40.68
 ```
 
-26 tests run every endpoint against both backends. They cover CRUD, latest record, date range, duplicates (409), validation (422), reversed date ranges (400), and invalid ObjectIds (400). The tests need no running database: they use in-memory SQLite and mongomock.
+This is a prediction based on the latest available record in the historical dataset, which ends on February 28, 2017. It is **not a forecast of current air quality**.
+
+## 6. Testing
+
+Run the tests from the project root:
+
+```bash
+python -m pytest -v
+```
+
+The latest reported test run completed with **31 passed tests**:
+
+- 26 API tests covering SQL and MongoDB API behavior.
+- 5 prediction tests covering feature preparation, prediction output, missing fields, invalid timestamps, and HTTP error handling.
+
+The API tests use test database substitutes, including in-memory SQLite and `mongomock`. A passing test suite does not replace verification of the deployed database configuration or an end-to-end demonstration.
+
+## 7. Limitations
+
+- The dataset ends in February 2017.
+- The prediction script uses the latest available record from the configured API.
+- The model predicts next-hour PM2.5 for Dongsi; performance should not be assumed to generalize to all stations without further evaluation.
+- Model performance metrics describe the evaluated data split and do not guarantee future accuracy.
+- Database credentials and API secrets must remain private.
+
+## 8. Submission checklist
+
+- [ ] Task 1 notebook with EDA, visualizations, interpretations, feature engineering, and model experiments.
+- [ ] MySQL schema and ERD.
+- [ ] MongoDB collection design and sample documents.
+- [ ] At least three SQL queries and three MongoDB queries with results.
+- [ ] CRUD API and latest-record/date-range endpoints.
+- [ ] Saved model and working prediction script.
+- [ ] Automated tests and results.
+- [ ] PDF report covering methodology, findings, limitations, and individual contributions.
+- [ ] GitHub repository link and relevant commit history.
+- [ ] No passwords, API secrets, or private connection strings committed.
