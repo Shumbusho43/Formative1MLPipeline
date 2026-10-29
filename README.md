@@ -17,8 +17,8 @@ The deployed API uses hosted Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`).
 
 | Task | Member | Responsibility | Main location |
 |---|---|---|---|
-| 1 | Kyla Ochweri | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/` |
-| 2 | Nicole Mbera | MySQL and MongoDB database design | `database/schema_mysql.sql`, database documentation |
+| 1 | Kyla Ochweri | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/Beijing_Air_Quality_Task1.ipynb` |
+| 2 | Nicole Mbera | MySQL and MongoDB database design | `notebooks/Beijing_Air_Quality_Task2_querries.ipynb`, `database/schema_mysql.sql`, `database/erd.png` |
 | 3 | David Shumbusho | CRUD and time-series API | `api/`, `database/load_data.py`, `tests/` |
 | 4 | Frank Musiime | Prediction script and model integration | `prediction/predict.py`, `models/best_rf.joblib` |
 
@@ -26,7 +26,14 @@ The deployed API uses hosted Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`).
 
 ```text
 Formative1MLPipeline/
-├── api/
+├── notebooks/
+│   ├── Beijing_Air_Quality_Task1.ipynb          Task 1: EDA, analytical questions, model training
+│   └── Beijing_Air_Quality_Task2_querries.ipynb Task 2: schema, ERD, SQL and MongoDB queries
+├── database/
+│   ├── schema_mysql.sql                         MySQL DDL (3 tables)
+│   ├── erd.png                                  Entity-relationship diagram
+│   └── load_data.py                             Loads the CSVs into MySQL and MongoDB
+├── api/                                         Task 3: FastAPI service
 │   ├── main.py
 │   ├── config.py
 │   ├── schemas.py
@@ -35,21 +42,21 @@ Formative1MLPipeline/
 │   └── routers/
 │       ├── sql_readings.py
 │       └── mongo_readings.py
-├── database/
-│   ├── schema_mysql.sql
-│   └── load_data.py
-├── notebooks/
-│   └── Beijing_Air_Quality_Task1.ipynb
 ├── prediction/
-│   └── predict.py
+│   └── predict.py                               Task 4: API → model → forecast
 ├── models/
-│   └── best_rf.joblib
+│   └── best_rf.joblib                           Tuned Random Forest pipeline
 ├── tests/
+│   ├── conftest.py                              Keeps tests off the hosted databases
 │   ├── test_api.py
 │   └── test_prediction.py
+├── report/
+│   ├── Group_Report.pdf
+│   └── Group_Report.docx
+├── data/raw/                                    Kaggle CSVs (not committed, see Setup)
 ├── requirements.txt
-├── README.md
-└── .env.example
+├── .env.example                                 Settings to copy into .env (not committed)
+└── README.md
 ```
 
 ## 1. Setup
@@ -98,7 +105,7 @@ The deployed API uses hosted databases. Local setup may require separate databas
 
 ## 2. Task 1 — Time-series analysis and machine learning
 
-The Task 1 notebook is `notebooks/Beijing_Air_Quality_Task1.ipynb`.
+The Task 1 notebook is `notebooks/Beijing_Air_Quality_Task1.ipynb`. It is written for Google Colab: the first cell asks you to upload the Kaggle ZIP archive, which it extracts to `/content/beijing_air_quality`.
 
 The model predicts **next-hour PM2.5 concentration for the Dongsi station**. The target is formed by shifting the PM2.5 series by one hour, while the input features represent the current observation and time.
 
@@ -123,9 +130,11 @@ Ensure the notebook includes the assignment's required analytical questions, vis
 
 ## 3. Task 2 — Relational and non-relational databases
 
+The Task 2 notebook is `notebooks/Beijing_Air_Quality_Task2_querries.ipynb`. It connects to the hosted databases (Aiven MySQL and MongoDB Atlas) using the settings in `.env`, verifies that all 420,768 records are present, and runs 5 SQL and 4 MongoDB queries with their results saved in the notebook. It can be run from the project root or from `notebooks/`, with the CSVs in `data/raw/`.
+
 ### MySQL
 
-The MySQL schema is in `database/schema_mysql.sql`. The documented tables include:
+The MySQL schema is in `database/schema_mysql.sql` and the ERD is `database/erd.png`. The tables are:
 
 - `stations`
 - `readings`
@@ -133,9 +142,7 @@ The MySQL schema is in `database/schema_mysql.sql`. The documented tables includ
 
 ### MongoDB
 
-MongoDB reading documents use nested pollutant and weather information. The API maps records into a common response structure.
-
-The assignment evidence should include the ERD, SQL schema, MongoDB collection design and sample documents, and at least three queries for each database with their results.
+The `air_quality_readings` collection stores one document per station-hour, with nested `pollutants` and `weather` sub-documents. The API maps documents into the same flat response shape as the SQL endpoints.
 
 ## 4. Task 3 — CRUD and time-series API
 
@@ -267,6 +274,6 @@ The API tests use test database substitutes, including in-memory SQLite and `mon
 - [ ] CRUD API and latest-record/date-range endpoints.
 - [ ] Saved model and working prediction script.
 - [ ] Automated tests and results.
-- [ ] PDF report covering methodology, findings, limitations, and individual contributions.
+- [ ] PDF report covering methodology, findings, limitations, and individual contributions (`report/Group_Report.pdf`).
 - [ ] GitHub repository link and relevant commit history.
 - [ ] No passwords, API secrets, or private connection strings committed.
