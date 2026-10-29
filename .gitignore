@@ -9,3 +9,7 @@ data/raw/
 .DS_Store
 .claude/
 .env
+
+# Dataset archive and figures written by notebook runs (already embedded in the notebooks)
+*.zip
+notebooks/*.png
