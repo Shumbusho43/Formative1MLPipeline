@@ -22,7 +22,9 @@ app = FastAPI(
     description=(
         "CRUD and time-series query endpoints over the Beijing Multi-Site Air Quality "
         "dataset, stored in both a relational database (`/sql`) and MongoDB (`/mongo`). "
-        "Both backends accept and return the same flat reading shape."
+        "Both backends accept and return the same flat reading shape.\n\n"
+        "**Note:** the live instance runs on Render's free tier, which sleeps after ~15 minutes "
+        "of inactivity. The first request after a pause can take up to a minute; retry if it times out."
     ),
     version="1.0.0",
     lifespan=lifespan,
