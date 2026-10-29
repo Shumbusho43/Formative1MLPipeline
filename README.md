@@ -15,14 +15,12 @@ The deployed API uses hosted Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`).
 
 ## Project responsibilities
 
-| Task | Responsibility | Main location |
-|---|---|---|
-| 1 | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/` |
-| 2 | MySQL and MongoDB database design | `database/schema_mysql.sql`, database documentation |
-| 3 | CRUD and time-series API | `api/`, `database/load_data.py`, `tests/` |
-| 4 | Prediction script and model integration | `prediction/predict.py`, `models/best_rf.joblib` |
-
-Replace these task descriptions with the actual group members' names before submission.
+| Task | Member | Responsibility | Main location |
+|---|---|---|---|
+| 1 | Kyla | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/` |
+| 2 | Nicole | MySQL and MongoDB database design | `database/schema_mysql.sql`, database documentation |
+| 3 | David | CRUD and time-series API | `api/`, `database/load_data.py`, `tests/` |
+| 4 | Musiime | Prediction script and model integration | `prediction/predict.py`, `models/best_rf.joblib` |
 
 ## Project structure
 
