@@ -15,10 +15,10 @@ It is backed by hosted databases: Aiven MySQL (`/sql`) and MongoDB Atlas (`/mong
 
 | Task | Owner | Location |
 |------|-------|----------|
-| 1. Preprocessing, EDA, model | Member 1 | `notebooks/` *(to add)* |
-| 2. MySQL + MongoDB design | Member 2 | `notebooks/`, `database/schema_mysql.sql` |
-| 3. CRUD + time-series API | Member 3 | `api/`, `database/load_data.py`, `tests/` |
-| 4. Prediction script | Member 4 | *(to add)* |
+| 1. Preprocessing, EDA, model | Kyla (Member 1) | `notebooks/` *(to add)* |
+| 2. MySQL + MongoDB design | Nicole (Member 2) | `notebooks/`, `database/schema_mysql.sql` |
+| 3. CRUD + time-series API | David (Member 3) | `api/`, `database/load_data.py`, `tests/` |
+| 4. Prediction script | Musiime (Member 4) | *(to add)* |
 
 ## Project structure
 
