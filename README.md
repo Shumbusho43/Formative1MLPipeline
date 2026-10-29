@@ -2,6 +2,17 @@
 
 Group formative: time-series preprocessing, SQL + MongoDB databases, a CRUD/time-series API, and a forecasting script, built on the [Beijing Multi-Site Air Quality dataset](https://www.kaggle.com/datasets/sid321axn/beijing-multisite-airquality-data-set) (12 stations, hourly, 2013-03-01 → 2017-02-28, 420,768 rows).
 
+## Live API
+
+The API is deployed on Render:
+
+- **Base URL:** https://formative1mlpipeline.onrender.com
+- **Interactive docs (Swagger):** https://formative1mlpipeline.onrender.com/docs
+
+It is backed by hosted databases: Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`), both loaded with the full dataset.
+
+> **Note: Render free tier sleeps.** The service spins down after ~15 minutes without traffic. The first request after that can take **up to a minute** while it wakes up; later requests are fast. If a request times out, wait a moment and retry, or open the docs link once to wake it before a demo. Scripts calling the API should use a generous timeout (e.g. `timeout=90`).
+
 | Task | Owner | Location |
 |------|-------|----------|
 | 1. Preprocessing, EDA, model | Member 1 | `notebooks/` *(to add)* |
@@ -57,6 +68,18 @@ uvicorn api.main:app --reload
 
 Interactive docs (try every endpoint in the browser): http://127.0.0.1:8000/docs
 
+### Deploying to Render
+
+The live instance uses these settings (Render → New → Web Service):
+
+| Setting | Value |
+|---|---|
+| Build command | `pip install -r requirements.txt` |
+| Start command | `uvicorn api.main:app --host 0.0.0.0 --port $PORT` |
+| Environment | `SQL_DATABASE_URL`, `SQL_SSL=true`, `MONGO_URI`, `MONGO_DB_NAME`, `MONGO_COLLECTION`, `PYTHON_VERSION` |
+
+Atlas must allow connections from `0.0.0.0/0` (Network Access), because Render's free tier has no fixed outbound IP.
+
 ## Endpoints
 
 Both backends expose the same routes under `/sql` and `/mongo`, and accept/return the same flat JSON shape:
@@ -89,16 +112,31 @@ In MongoDB, readings are stored with the nested `pollutants` / `weather` structu
 
 ### Examples
 
+Against the live deployment (swap in `http://127.0.0.1:8000` when running locally):
+
 ```bash
-curl "http://127.0.0.1:8000/sql/readings/latest?station=Dongsi"
-curl "http://127.0.0.1:8000/mongo/readings/range?start=2016-01-01T00:00:00&end=2016-01-07T23:00:00&station=Dongsi"
-curl -X POST http://127.0.0.1:8000/mongo/readings -H "Content-Type: application/json" \
+API=https://formative1mlpipeline.onrender.com
+
+curl "$API/sql/readings/latest?station=Dongsi"
+curl "$API/mongo/readings/range?start=2016-01-01T00:00:00&end=2016-01-07T23:00:00&station=Dongsi"
+curl -X POST "$API/mongo/readings" -H "Content-Type: application/json" \
      -d '{"station":"Dongsi","timestamp":"2017-03-01T00:00:00","pm25":28,"temp":7.9}'
-curl -X PUT http://127.0.0.1:8000/sql/readings/420769 -H "Content-Type: application/json" -d '{"pm25":35}'
-curl -X DELETE http://127.0.0.1:8000/sql/readings/420769
+curl -X PUT "$API/sql/readings/<id>" -H "Content-Type: application/json" -d '{"pm25":35}'
+curl -X DELETE "$API/sql/readings/<id>"
 ```
 
 ### For Task 4 (prediction script)
+
+Fetch data from the live API, allowing for the free-tier wake-up delay:
+
+```python
+import requests
+
+API = "https://formative1mlpipeline.onrender.com"
+resp = requests.get(f"{API}/sql/readings/latest", params={"station": "Dongsi"}, timeout=90)
+resp.raise_for_status()
+reading = resp.json()
+```
 
 The model from Task 1 uses the raw CSV column names. Map the API fields back before predicting:
 
