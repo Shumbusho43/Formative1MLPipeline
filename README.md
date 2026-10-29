@@ -17,10 +17,10 @@ The deployed API uses hosted Aiven MySQL (`/sql`) and MongoDB Atlas (`/mongo`).
 
 | Task | Member | Responsibility | Main location |
 |---|---|---|---|
-| 1 | Kyla | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/` |
-| 2 | Nicole | MySQL and MongoDB database design | `database/schema_mysql.sql`, database documentation |
-| 3 | David | CRUD and time-series API | `api/`, `database/load_data.py`, `tests/` |
-| 4 | Musiime | Prediction script and model integration | `prediction/predict.py`, `models/best_rf.joblib` |
+| 1 | Kyla Ochweri | Data preprocessing, EDA, feature engineering, model experiments | `notebooks/` |
+| 2 | Nicole Mbera | MySQL and MongoDB database design | `database/schema_mysql.sql`, database documentation |
+| 3 | David Shumbusho | CRUD and time-series API | `api/`, `database/load_data.py`, `tests/` |
+| 4 | Frank Musiime | Prediction script and model integration | `prediction/predict.py`, `models/best_rf.joblib` |
 
 ## Project structure
 
