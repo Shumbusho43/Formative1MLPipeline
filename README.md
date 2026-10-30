@@ -239,8 +239,7 @@ The feature names and order must match those used during training. The script sh
 
 A previous successful run produced:
 
-```![This is the prediction ](image.png)
-```
+<img width="550" height="112" alt="image" src="https://github.com/user-attachments/assets/947ce026-49f4-42df-8598-221cc26ebfa8" />
 
 This is a prediction based on the latest available record in the historical dataset, which ends on February 28, 2017. It is **not a forecast of current air quality**.
 
