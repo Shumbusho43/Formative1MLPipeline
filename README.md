@@ -1,6 +1,12 @@
-# Beijing Air Quality — Time-Series ML Pipeline
+# Beijing Air Quality: Time-Series ML Pipeline
 
-A group formative project using the Beijing Multi-Site Air Quality dataset to demonstrate time-series preprocessing, exploratory data analysis (EDA), machine learning, relational and non-relational databases, CRUD APIs, and next-hour PM2.5 prediction.
+This is a group formative project using the Beijing Multi-Site Air Quality dataset to demonstrate time-series preprocessing, exploratory data analysis (EDA), machine learning, relational and non-relational databases, CRUD APIs, and next-hour PM2.5 prediction.
+
+**Problem:** PM2.5 particles are among the most dangerous pollutants that wander deep into airways and are linked to cardiovascular and respiratory disease. They account for 8 million global premature deaths annually. Unfortunately, 99% of the world's population lives in areas that fail to meet strict World Health Organization (WHO) air quality guidelines of 5 µg/m³, including Beijing whose levels at every one of their 12 stations far exceed health guidelines averaging at 66–86 μg/m³. 
+This made us venture into exploring if we can forecast the PM2.5. Perhaps a reliable short-term forecast lets residents, schools and health services act before a pollution spike, for example by limiting outdoor activity or issuing alerts.
+
+**Research question:** 
+Given the pollutant and weather readings at a monitoring station for the current hour, can we predict the PM2.5 concentration (μg/m³) for the next hour?
 
 The dataset contains hourly air-quality measurements from 12 monitoring stations between March 1, 2013, and February 28, 2017, with 420,768 records.
 
@@ -265,15 +271,3 @@ The API tests use test database substitutes, including in-memory SQLite and `mon
 - Model performance metrics describe the evaluated data split and do not guarantee future accuracy.
 - Database credentials and API secrets must remain private.
 
-## 8. Submission checklist
-
-- [ ] Task 1 notebook with EDA, visualizations, interpretations, feature engineering, and model experiments.
-- [ ] MySQL schema and ERD.
-- [ ] MongoDB collection design and sample documents.
-- [ ] At least three SQL queries and three MongoDB queries with results.
-- [ ] CRUD API and latest-record/date-range endpoints.
-- [ ] Saved model and working prediction script.
-- [ ] Automated tests and results.
-- [ ] PDF report covering methodology, findings, limitations, and individual contributions (`report/Group_Report.pdf`).
-- [ ] GitHub repository link and relevant commit history.
-- [ ] No passwords, API secrets, or private connection strings committed.
