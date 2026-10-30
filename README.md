@@ -1,4 +1,4 @@
-# Beijing Air Quality: Time-Series ML Pipeline
+# Beijing Air Quality: Time-Series ML Pipeline.
 
 This is a group formative project using the Beijing Multi-Site Air Quality dataset to demonstrate time-series preprocessing, exploratory data analysis (EDA), machine learning, relational and non-relational databases, CRUD APIs, and next-hour PM2.5 prediction.
 
