@@ -239,11 +239,7 @@ The feature names and order must match those used during training. The script sh
 
 A previous successful run produced:
 
-```text
-Station: Dongsi
-Latest recorded timestamp: 2017-02-28T23:00:00
-Latest recorded PM2.5: 30.0
-Predicted next-hour PM2.5: 40.68
+```![This is the prediction ](image.png)
 ```
 
 This is a prediction based on the latest available record in the historical dataset, which ends on February 28, 2017. It is **not a forecast of current air quality**.
